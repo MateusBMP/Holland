@@ -3,10 +3,10 @@
    para encontrar os coeficientes de uma função de 
    segundo grau.
    * a população é formada por 10 cromossomo 
-   * o cromossomo é um vetor de 2 posições 
+   * o cromossomo são dois vetores de 12 posições 
    * cruzamento de um ponto de corte e probabilidade de cruzamento maior que 60
-   * mutação por complemento com probabilidade de mutação maior que 90
-   * inversão com probabilidade de inversão de 90
+   * mutação por complemento com probabilidade de mutação maior que 70
+   * inversão com probabilidade de inversão de 70
    * seleção e substituição elitista 
 }
 
@@ -79,126 +79,142 @@ begin
     des2real := int2real(des2int(d,a,b));
 end;
 
-procedure gera_pop_in(var p: pop);					// gera aleatoriamente a população inicial
+procedure gera_pop_in(var p: pop); // gera aleatoriamente a população inicial
 begin
-    for i:= 1 to 10 do								// laço do população
-        for j:= 1 to 2 do							// laço do coeficiente
+    for i:= 1 to 10 do // laço do população
+        for j:= 1 to 2 do // laço do coeficiente
             for k:= 1 to 12 do                      // laço do binário
                 p[i,j,k]:= random(2);
 end;
 
-procedure mostra_pop(p: pop);						// mostra a população atual
+procedure mostra_pop(p: pop); // mostra a população atual
 begin
-    for i:= 1 to 10 do								// laço da população
+    for i:= 1 to 10 do // laço da população
         begin
-            for j:= 1 to 2 do			            // laço do coeficiente
+            for j:= 1 to 2 do            // laço do coeficiente
                 write(pop2real(p,i,j):2:2, ' ');         // escreve numero real do binario
-            writeln;    							// salta de linha  
+            writeln;     // salta de linha  
         end;
 end;
 
-procedure adaptacao(var f1: adapt; p: pop; coef: coeficiente);			// calcula o valor da adaptação da população atual
+procedure adaptacao(var f1: adapt; p: pop; coef: coeficiente); // calcula o valor da adaptação da população atual
+var x1,x2: real;
 begin
-    for i:= 1 to 10 do								// laço do população
-        begin										
-            f1[i]:= 0;								// local onde a adaptação do coeficiente i será armazenada
-            for j:= 1 to 2 do						// laço do coeficiente
-                f1[i]:= f1[i] + abs((coef[1] * (pop2real(p,i,j)**2)) + (coef[2] * pop2real(p,i,j)) + (coef[3]));	 // incrementa o valor da adaptação a partir do resultado da equação
-        end;    
-end;
-
-procedure mostra_pop_adapt(f1: adapt; p: pop); 		// mostra a população atual com sua adaptação
-begin
-    for i:= 1 to 10 do								// laço da população
+    for i:= 1 to 10 do // laço do população
         begin
-            for j:= 1 to 2 do						// laço do coeficiente
-                write(pop2real(p,i,j):2:2, ' ');	// escreve cada posição do coeficiente
-            writeln('= ', f1[i]:10:0);    				// escreve a adaptação do coeficiente e salta de linha	
+            f1[i]:= 0; // local onde a adaptação do coeficiente i será armazenada
+         
+            if (pop2real(p,i,1) <> pop2real(p,i,2))
+            then begin
+                x1:= abs((coef[1] * (pop2real(p,i,1)**2)) + (coef[2] * pop2real(p,i,1)) + (coef[3]));
+                x2:= abs((coef[1] * (pop2real(p,i,2)**2)) + (coef[2] * pop2real(p,i,2)) + (coef[3]));
+
+                if (x1 <> 0) then 
+                    f1[i]:= f1[i] - x1;
+
+                if (x2 <> 0) then 
+                    f1[i]:= f1[i] - x2;
+                // estou atras do 0 então este deve ser o maior valor por isso troquei o mais por -
+            end
+            else f1[i]:= -1000; // penaliza a adaptação por elas serem números iguais
         end;    
 end;
 
-procedure ordena_pop(var f1: adapt; var p: pop);	// algoritmo bolha de ordenação
+procedure mostra_pop_adapt(f1: adapt; p: pop); // mostra a população atual com sua adaptação
+begin
+    for i:= 1 to 10 do // laço da população
+        begin
+            for j:= 1 to 2 do // laço do coeficiente
+                write(pop2real(p,i,j):2:2, ' '); // escreve cada posição do coeficiente
+            writeln('= ', f1[i]:10:5);     // escreve a adaptação do coeficiente e salta de linha
+        end;    
+end;
+
+procedure ordena_pop(var f1: adapt; var p: pop); // algoritmo bolha de ordenação
 var a,b,c: integer;
     d: real;
 begin
-    for a:= 1 to 9 do								// laço do primeiro ponteiro
-        for b:= a+1 to 10 do						// laço do segundo pondeiro
+    for a:= 1 to 9 do // laço do primeiro ponteiro
+        for b:= a+1 to 10 do // laço do segundo pondeiro
+        begin
+            if (f1[a] < f1[b]) then 
             begin
-                if (f1[a] > f1[b])
-                then begin
-                        for i:= 1 to 2 do			// troca os coeficientes na população
-                            for j:= 1 to 12 do
-                            begin
-                                c:= p[a,i,j];
-                                p[a,i,j]:= p[b,i,j];
-                                p[b,i,j]:= c;
-                            end;
-                        d:= f1[a];					// troca a adaptação
-                        f1[a]:= f1[b];
-                        f1[b]:= d;
-                     end;
+                for i:= 1 to 2 do // troca os coeficientes na população
+                    for j:= 1 to 12 do
+                    begin
+                        c:= p[a,i,j];
+                        p[a,i,j]:= p[b,i,j];
+                        p[b,i,j]:= c;
+                    end;
+                d:= f1[a]; // troca a adaptação
+                f1[a]:= f1[b];
+                f1[b]:= d;
             end;
+        end;
 end;
 
-procedure cruzamento(p: pop; var d: des; var tam: integer);		// cruzamento de 1 ponto de corte
+procedure cruzamento(p: pop; var d: des; var tam: integer); // cruzamento de 1 ponto de corte
 var a,b,c,x,corte: integer;
 begin
-    for a:= 1 to 4 do											// laço do cromossomo pai
-        for b:= (a + 1) to 5 do									// laço do cromossomo mãe
+    for a:= 1 to 4 do // laço do cromossomo pai
+        for b:= (a + 1) to 5 do // laço do cromossomo mãe
+        begin
+            x:= random(100) + 1;       // probabilidade de cruzamento
+            if (x>60) and (tam<=28) then
             begin
-                x:= random(100) + 1;      						// probabilidade de cruzamento
-                if (x>60) and (tam<=28) then 
+                for c:= 1 to 2 do
                 begin
-                    for c:= 1 to 2 do
-                    begin
-                        corte:= random(12) + 1;				// geração do ponto de corte
-                                                        
-                        for x:= 1 to corte do				// copia a primeira parte da posição 1 até corte
-                            begin
-                                d[tam + 1,c,x]:= p[a,c,x];
-                                d[tam + 2,c,x]:= p[b,c,x];
-                            end;
-                            
-                        for x:= corte + 1 to 12 do			// copia a segunda parte da posição corte+1 até 8
-                            begin
-                                d[tam + 1,c,x]:= p[b,c,x];
-                                d[tam + 2,c,x]:= p[a,c,x];
-                            end;
-                    end;
-                            
-                    tam:= tam + 2;
+                    corte:= random(12) + 1; // geração do ponto de corte
+                                                    
+                    for x:= 1 to corte do // copia a primeira parte da posição 1 até corte
+                        begin
+                            d[tam + 1,c,x]:= p[a,c,x];
+                            d[tam + 2,c,x]:= p[b,c,x];
+                        end;
+                        
+                    for x:= corte + 1 to 12 do // copia a segunda parte da posição corte+1 até 8
+                        begin
+                            d[tam + 1,c,x]:= p[b,c,x];
+                            d[tam + 2,c,x]:= p[a,c,x];
+                        end;
                 end;
+                        
+                tam:= tam + 2;
             end;
+        end;
 end;
 
-procedure mostra_des(d: des;tam: integer);						// mostra a população de descendentes
+procedure mostra_des(d: des;tam: integer); // mostra a população de descendentes
 begin
     for i:= 1 to tam do
         begin
             for j:= 1 to 2 do
-                write(des2real(d,i,j):2:2, ' ');               // escreve numero real do binario
+                write(des2real(d,i,j):2:2, ' '); // escreve numero real do binario
             writeln;    
         end;    
 end;
 
-procedure mutacao(p: pop; var d: des; var tam: integer);		// mutação por complemento
+procedure mutacao(p: pop; var d: des; var tam: integer); // mutação por complemento
 var a,b,c,x: integer;
 begin
-    for a:= 1 to 5 do											// laço do cromossomo a ser mutado
+    for a:= 1 to 5 do // laço do cromossomo a ser mutado
     begin
-        x:= random(100) + 1;								    // probabilidade de mutação
-        if (tam <=29) and (x>90) then 
+        x:= random(100) + 1; // probabilidade de mutação
+     
+        if (tam <=29) and (x>70) then
         begin
-            tam:= tam + 1;									
+            tam:= tam + 1;
             for b:= 1 to 2 do
                 for c:= 1 to 12 do
                 begin
-                    x:= random(2);	    						// verifica se deve mutar a atual posição do cromossomo
-                    if (x = 0)
-                    then if (p[a,b,c] = 0)
-                        then d[tam,b,c]:= 1
-                        else d[tam,b,c]:= 0
-                    else d[tam,b,c]:= p[a,b,c];
+                    x:= random(2); // verifica se deve mutar a atual posição do cromossomo
+                    if (x = 0) then 
+                        if (p[a,b,c] = 0) then 
+                            d[tam,b,c]:= 1
+                        else
+                            d[tam,b,c]:= 0
+                    else 
+                        d[tam,b,c]:= p[a,b,c];
                 end;
         end;
     end;
@@ -209,23 +225,25 @@ var a,b,c,p1,p2,x,y: integer;
 begin
     for a:= 1 to 5 do
         begin
-            x:= random(100) + 1;									// probabilidade de inversão é maior do que 90
-            if (x>90) and (tam<=29) then 
+            x:= random(100) + 1; // probabilidade de inversão é maior do que 90
+
+            if (x>70) and (tam<=29) then
             begin
                 tam:= tam + 1;
                 for c:= 1 to 2 do
                 begin
-                    for b:= 1 to 12 do								// copia o cromossomo 
+                    for b:= 1 to 12 do // copia o cromossomo
                         d[tam,c,b]:= p[a,c,b];
 
-                    p1:= random(11) + 1;								// escolhe a primeira posição
-                    p2:= random(12) + 1;						
-                    while (p2<p1) do 								// escolhe a segunda posição, onde p1 < p2
-                        p2:= random(12) + 1;						
-                    
+                    p1:= random(11) + 1; // escolhe a primeira posição
+                    p2:= random(12) + 1;
+
+                    while (p2<=p1) do // escolhe a segunda posição, onde p1 < p2
+                        p2:= random(12) + 1;
+                   
                     x:= (p2-p1) div 2;
-                    
-                    for b:= 0 to x do								// inverte o conteúdo do cromossomo entre p1 e p2
+                   
+                    for b:= 0 to x do // inverte o conteúdo do cromossomo entre p1 e p2
                     begin
                         y:= d[tam, c, p1 + b];
                         d[tam, c, p1 + b]:= d[tam, c, p2 - b ];
@@ -237,49 +255,60 @@ begin
 end;
 
 procedure adaptacaoD(var f2: adaptdes; d: des; coef: coeficiente; tam: integer);
+var x1,x2:real;
 begin
     for i:= 1 to tam do
+    begin
+        f2[i]:= 0;
+
+        if (des2real(d,i,1)<>des2real(d,i,2)) then 
         begin
-            f2[i]:= 0;
-            for j:= 1 to 2 do
-                f2[i]:= f2[i] + abs((coef[1] * (des2real(d,i,j)**2)) + (coef[2] * (des2real(d,i,j)**2)) + (coef[3]));
-        end;    
+            x1:= abs((coef[1] * (des2real(d,i,1)**2)) + (coef[2] * des2real(d,i,1)) + (coef[3]));
+            x2:= abs((coef[1] * (des2real(d,i,2)**2)) + (coef[2] * des2real(d,i,2)) + (coef[3]));
+
+            if (x1 <> 0) then 
+                f2[i]:= f2[i] - x1;
+            if (x2 <> 0) then 
+                f2[i]:= f2[i] - x2;
+            // como vamos atras do valor z, então todos os outros valores devem ser negativos              
+        end
+        else 
+            f2[i]:= -1000;
+    end;    
 end;
 
 procedure mostra_pop_adaptD(f2: adaptdes; d: des; tam: integer);
 begin
     for i:= 1 to tam do
         begin
-            for j:= 1 to 2 do						    // laço do coeficiente
-                write(des2real(d,i,j):2:2, ' ');	    // escreve cada posição do coeficiente
-            writeln('= ', f2[i]:10:0);    				// escreve a adaptação do coeficiente e salta de linha	  
+            for j:= 1 to 2 do    // laço do coeficiente
+                write(des2real(d,i,j):2:2, ' ');    // escreve cada posição do coeficiente
+            writeln('= ', f2[i]:10:5);     // escreve a adaptação do coeficiente e salta de linha  
         end;    
 end;
 
-procedure ordena_popD(var f2: adaptdes; var d: des; tam: integer);		// oedenação de bolha
+procedure ordena_popD(var f2: adaptdes; var d: des; tam: integer); // ordenação de bolha
 var a,b,c: integer;
     x: real;
 begin
     for a:= 1 to tam - 1 do
         for b:= a + 1 to tam do
+        begin
+            if (f2[a] < f2[b]) then 
             begin
-                if (f2[a] > f2[b])							
-                then begin
-                
-                        for i:= 1 to 2 do								// troca cromossomo
-                            for j:= 1 to 12 do
-                            begin
-                                c:= d[a,i,j];
-                                d[a,i,j]:= d[b,i,j];
-                                d[b,i,j]:= c;
-                            end;
-                            
-                        x:= f2[a];										// troca adaptação
-                        f2[a]:= f2[b];
-                        f2[b]:= x;
-                        
-                     end;
+                for i:= 1 to 2 do // troca cromossomo
+                    for j:= 1 to 12 do
+                    begin
+                        c:= d[a,i,j];
+                        d[a,i,j]:= d[b,i,j];
+                        d[b,i,j]:= c;
+                    end;
+                    
+                x:= f2[a]; // troca adaptação
+                f2[a]:= f2[b];
+                f2[b]:= x;
             end;
+        end;
 end;
 
 // Esse algoritmo aqui tem um erro que não seleciona os melhores das duas populações.
@@ -290,51 +319,57 @@ var a,b,c,x: integer;
     pN: pop;
     f3: adaptdes;
 begin
-    b:= 1; 											// indice da população atual 
-    c:= 1; 											// indice da população de descendentes
-    for a:= 1 to 10 do 								// indice da nova população
-        begin
-			if (b<=10) and (c<=tam)  
-			then 	if (f1[b] > f2[c])				// população é maior que descendente
-					then begin 
-                    		for i:= 1 to 2 do		// copia o cromossomo da população atual para a nova população
-                                for j:= 1 to 12 do
-                        		    pN[a,i,j]:= p[b,i,j];
-                    		f3[a]:= f1[b];			// copia a adaptação desse cromossomo
-                    		b:= b + 1;				// incrementa o indice da população atual
-						 end
-                    else begin
-							for i:= 1 to 2 do		// copia o cromossomo da população de descendentes para a nova população
-								for j:= 1 to 12 do
-                                    pN[a,i,j]:= d[c,i,j];
-							f3[a]:= f2[c];			// copia a adaptação desse cromossomo
-							c:= c + 1;				// incrementa o indice da população de descendentes
-						 end
-						 
-			else 	if (b<=10) and (c>tam)
-					then begin 
-							for i:= 1 to 2 do		// copia o cromossomo da população atual para a nova população
-								for j:= 1 to 12 do
-                                    pN[a,i,j]:= p[b,i,j];
-                    		f3[a]:= f1[b];			// copia a adaptação desse cromossomo
-                    		b:= b + 1;				// incrementa o indice da população atual
-                 	      end
-					else begin
-							for i:= 1 to 2 do
-								for j:= 1 to 12 do
-                                    pN[a,i,j]:= d[c,i,j];
-							f3[a]:= f2[c];
-							c:= c + 1;
-						 end    
-        end;
+    b:= 1; // indice da população atual
+    c:= 1; // indice da população de descendentes
+    for a:= 1 to 10 do // indice da nova população
+    begin
+        if (b<=10) and (c<=tam) then 
+            if (f1[b] > f2[c]) then // população é maior que descendente
+            begin
+                for i:= 1 to 2 do // copia o cromossomo da população atual para a nova população
+                    for j:= 1 to 12 do
+                        pN[a,i,j]:= p[b,i,j];
 
-    for a:= 1 to 10 do								// coloca a nova população no lugar da população atual
+                f3[a]:= f1[b]; // copia a adaptação desse cromossomo
+                b:= b + 1; // incrementa o indice da população atual
+            end
+            else 
+            begin
+                for i:= 1 to 2 do // copia o cromossomo da população de descendentes para a nova população
+                    for j:= 1 to 12 do
+                        pN[a,i,j]:= d[c,i,j];
+
+                f3[a]:= f2[c]; // copia a adaptação desse cromossomo
+                c:= c + 1; // incrementa o indice da população de descendentes
+            end
+        else if (b<=10) and (c>tam) then 
+        begin
+            for i:= 1 to 2 do // copia o cromossomo da população atual para a nova população
+                for j:= 1 to 12 do
+                    pN[a,i,j]:= p[b,i,j];
+
+            f3[a]:= f1[b]; // copia a adaptação desse cromossomo
+            b:= b + 1; // incrementa o indice da população atual
+        end
+        else 
         begin
             for i:= 1 to 2 do
                 for j:= 1 to 12 do
-                    p[a,i,j]:= pN[a,i,j];
-            f1[a]:= f3[a];							// coloca a nova adaptação no lugar da adaptação atual
-        end;    
+                    pN[a,i,j]:= d[c,i,j];
+
+            f3[a]:= f2[c];
+            c:= c + 1;
+        end;
+    end;
+
+    for a:= 1 to 10 do // coloca a nova população no lugar da população atual
+    begin
+        for i:= 1 to 2 do
+            for j:= 1 to 12 do
+                p[a,i,j]:= pN[a,i,j];
+
+        f1[a]:= f3[a]; // coloca a nova adaptação no lugar da adaptação atual
+    end;    
 end;
 
 begin
@@ -358,9 +393,9 @@ begin
     ordena_pop(f,pA);
     mostra_pop_adapt(f,pA);
 
-    while (f[1]>100) do
+    while (f[1] <> 0.0) do
     begin
-        {vou ficar com os 5 cromossomos mais adaptados, que são os 5 primeiros da minha população atual}
+        //vou ficar com os 5 cromossomos mais adaptados, que são os 5 primeiros da minha população atual
 
         tamD:= 0;
 
@@ -387,7 +422,5 @@ begin
         writeln; writeln('população nova');
         substituicao(pA,dA,f,fdes,tamD);
         mostra_pop_adapt(f,pA);
-        
     end;
-
 end.
