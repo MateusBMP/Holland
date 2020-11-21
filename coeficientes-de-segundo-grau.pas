@@ -3,7 +3,7 @@
    para encontrar os coeficientes de uma função de 
    segundo grau.
    * a população é formada por 10 cromossomo 
-   * o cromossomo são dois vetores de 12 posições 
+   * o cromossomo são dois vetores de 15 posições 
    * cruzamento de um ponto de corte e probabilidade de cruzamento maior que 60
    * mutação por complemento com probabilidade de mutação maior que 70
    * inversão com probabilidade de inversão de 70
@@ -14,9 +14,9 @@ Program CoeficientesDeSegundoGrau;
 
 uses Math;
 
-type pop= array[1..10,1..2,1..12] of integer;
+type pop= array[1..10,1..2,1..15] of integer;
      adapt= array[1..10] of real;
-     des= array[1..30,1..2,1..12] of integer;
+     des= array[1..30,1..2,1..15] of integer;
      adaptdes= array[1..30] of real;
      coeficiente= array[1..3] of integer;
 
@@ -34,7 +34,7 @@ begin
     result := 0;
     j := 0;
 
-    for i:= 12 downto 2 do                         // laço do binário ao contrário
+    for i:= 15 downto 2 do                         // laço do binário ao contrário
     begin
         result := result + (p[a,b,i] * (2**j));    // Calcula o binário elevando a potência da posição
         j := j + 1;
@@ -52,7 +52,7 @@ begin
     result := 0;
     j := 0;
 
-    for i:= 12 downto 2 do                         // laço do binário ao contrário
+    for i:= 15 downto 2 do                         // laço do binário ao contrário
     begin
         result := result + (d[a,b,i] * (2**j));    // Calcula o binário elevando a potência da posição
         j := j + 1;
@@ -66,7 +66,7 @@ end;
 
 function int2real(a: integer): real;               // Exibe um inteiro com duas casas decimais
 begin
-    int2real := a / 100;
+    int2real := a / 100000;
 end;
 
 function pop2real(p: pop; a,b: integer): real;     // Exibe um binário da população com duas casas decimais
@@ -83,7 +83,7 @@ procedure gera_pop_in(var p: pop); // gera aleatoriamente a população inicial
 begin
     for i:= 1 to 10 do // laço do população
         for j:= 1 to 2 do // laço do coeficiente
-            for k:= 1 to 12 do                      // laço do binário
+            for k:= 1 to 15 do                      // laço do binário
                 p[i,j,k]:= random(2);
 end;
 
@@ -92,7 +92,7 @@ begin
     for i:= 1 to 10 do // laço da população
         begin
             for j:= 1 to 2 do            // laço do coeficiente
-                write(pop2real(p,i,j):2:2, ' ');         // escreve numero real do binario
+                write(pop2real(p,i,j):2:5, ' ');         // escreve numero real do binario
             writeln;     // salta de linha  
         end;
 end;
@@ -125,7 +125,7 @@ begin
     for i:= 1 to 10 do // laço da população
         begin
             for j:= 1 to 2 do // laço do coeficiente
-                write(pop2real(p,i,j):2:2, ' '); // escreve cada posição do coeficiente
+                write(pop2real(p,i,j):2:5, ' '); // escreve cada posição do coeficiente
             writeln('= ', f1[i]:10:5);     // escreve a adaptação do coeficiente e salta de linha
         end;    
 end;
@@ -140,7 +140,7 @@ begin
             if (f1[a] < f1[b]) then 
             begin
                 for i:= 1 to 2 do // troca os coeficientes na população
-                    for j:= 1 to 12 do
+                    for j:= 1 to 15 do
                     begin
                         c:= p[a,i,j];
                         p[a,i,j]:= p[b,i,j];
@@ -164,7 +164,7 @@ begin
             begin
                 for c:= 1 to 2 do
                 begin
-                    corte:= random(12) + 1; // geração do ponto de corte
+                    corte:= random(15) + 1; // geração do ponto de corte
                                                     
                     for x:= 1 to corte do // copia a primeira parte da posição 1 até corte
                         begin
@@ -172,7 +172,7 @@ begin
                             d[tam + 2,c,x]:= p[b,c,x];
                         end;
                         
-                    for x:= corte + 1 to 12 do // copia a segunda parte da posição corte+1 até 8
+                    for x:= corte + 1 to 15 do // copia a segunda parte da posição corte+1 até 8
                         begin
                             d[tam + 1,c,x]:= p[b,c,x];
                             d[tam + 2,c,x]:= p[a,c,x];
@@ -189,7 +189,7 @@ begin
     for i:= 1 to tam do
         begin
             for j:= 1 to 2 do
-                write(des2real(d,i,j):2:2, ' '); // escreve numero real do binario
+                write(des2real(d,i,j):2:5, ' '); // escreve numero real do binario
             writeln;    
         end;    
 end;
@@ -205,7 +205,7 @@ begin
         begin
             tam:= tam + 1;
             for b:= 1 to 2 do
-                for c:= 1 to 12 do
+                for c:= 1 to 15 do
                 begin
                     x:= random(2); // verifica se deve mutar a atual posição do cromossomo
                     if (x = 0) then 
@@ -232,14 +232,14 @@ begin
                 tam:= tam + 1;
                 for c:= 1 to 2 do
                 begin
-                    for b:= 1 to 12 do // copia o cromossomo
+                    for b:= 1 to 15 do // copia o cromossomo
                         d[tam,c,b]:= p[a,c,b];
 
-                    p1:= random(11) + 1; // escolhe a primeira posição
-                    p2:= random(12) + 1;
+                    p1:= random(14) + 1; // escolhe a primeira posição
+                    p2:= random(15) + 1;
 
                     while (p2<=p1) do // escolhe a segunda posição, onde p1 < p2
-                        p2:= random(12) + 1;
+                        p2:= random(15) + 1;
                    
                     x:= (p2-p1) div 2;
                    
@@ -282,7 +282,7 @@ begin
     for i:= 1 to tam do
         begin
             for j:= 1 to 2 do    // laço do coeficiente
-                write(des2real(d,i,j):2:2, ' ');    // escreve cada posição do coeficiente
+                write(des2real(d,i,j):2:5, ' ');    // escreve cada posição do coeficiente
             writeln('= ', f2[i]:10:5);     // escreve a adaptação do coeficiente e salta de linha  
         end;    
 end;
@@ -297,7 +297,7 @@ begin
             if (f2[a] < f2[b]) then 
             begin
                 for i:= 1 to 2 do // troca cromossomo
-                    for j:= 1 to 12 do
+                    for j:= 1 to 15 do
                     begin
                         c:= d[a,i,j];
                         d[a,i,j]:= d[b,i,j];
@@ -327,7 +327,7 @@ begin
             if (f1[b] > f2[c]) then // população é maior que descendente
             begin
                 for i:= 1 to 2 do // copia o cromossomo da população atual para a nova população
-                    for j:= 1 to 12 do
+                    for j:= 1 to 15 do
                         pN[a,i,j]:= p[b,i,j];
 
                 f3[a]:= f1[b]; // copia a adaptação desse cromossomo
@@ -336,7 +336,7 @@ begin
             else 
             begin
                 for i:= 1 to 2 do // copia o cromossomo da população de descendentes para a nova população
-                    for j:= 1 to 12 do
+                    for j:= 1 to 15 do
                         pN[a,i,j]:= d[c,i,j];
 
                 f3[a]:= f2[c]; // copia a adaptação desse cromossomo
@@ -345,7 +345,7 @@ begin
         else if (b<=10) and (c>tam) then 
         begin
             for i:= 1 to 2 do // copia o cromossomo da população atual para a nova população
-                for j:= 1 to 12 do
+                for j:= 1 to 15 do
                     pN[a,i,j]:= p[b,i,j];
 
             f3[a]:= f1[b]; // copia a adaptação desse cromossomo
@@ -354,7 +354,7 @@ begin
         else 
         begin
             for i:= 1 to 2 do
-                for j:= 1 to 12 do
+                for j:= 1 to 15 do
                     pN[a,i,j]:= d[c,i,j];
 
             f3[a]:= f2[c];
@@ -365,7 +365,7 @@ begin
     for a:= 1 to 10 do // coloca a nova população no lugar da população atual
     begin
         for i:= 1 to 2 do
-            for j:= 1 to 12 do
+            for j:= 1 to 15 do
                 p[a,i,j]:= pN[a,i,j];
 
         f1[a]:= f3[a]; // coloca a nova adaptação no lugar da adaptação atual
